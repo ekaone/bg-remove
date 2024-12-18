@@ -41,7 +41,7 @@ Both implementations use Transformers.js to run the machine learning models dire
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/addyosmani/bg-remove.git
+git clone https://github.com/ekaone/bg-remove.git
 ```
 
 2. Install dependencies:
