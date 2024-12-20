@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import type { ImageFile } from "../App";
 
 interface EditModalProps {
@@ -9,55 +9,73 @@ interface EditModalProps {
 }
 
 const backgroundOptions = [
-  { id: 'color', label: 'Solid Color' },
-  { id: 'image', label: 'Image' }
+  { id: "color", label: "Solid Color" },
+  { id: "image", label: "Image" },
 ];
 
 const effectOptions = [
-  { id: 'none', label: 'None' },
-  { id: 'blur', label: 'Blur' },
-  { id: 'brightness', label: 'Bright' },
-  { id: 'contrast', label: 'Contrast' }
+  { id: "none", label: "None" },
+  { id: "blur", label: "Blur" },
+  { id: "brightness", label: "Bright" },
+  { id: "contrast", label: "Contrast" },
 ];
 
 const predefinedColors = [
-  '#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff',
-  '#ffff00', '#00ffff', '#ff00ff', '#808080', '#c0c0c0'
+  "#ffffff",
+  "#000000",
+  "#ff0000",
+  "#00ff00",
+  "#0000ff",
+  "#ffff00",
+  "#00ffff",
+  "#ff00ff",
+  "#808080",
+  "#c0c0c0",
 ];
 
 const predefinedPatterns = [
-  { id: 'dots', label: 'Dots' },
-  { id: 'lines', label: 'Lines' },
-  { id: 'grid', label: 'Grid' },
-  { id: 'waves', label: 'Waves' }
+  { id: "dots", label: "Dots" },
+  { id: "lines", label: "Lines" },
+  { id: "grid", label: "Grid" },
+  { id: "waves", label: "Waves" },
 ];
 
 export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
-  const [bgType, setBgType] = useState('color');
-  const [bgColor, setBgColor] = useState('#ffffff');
+  const [bgType, setBgType] = useState("color");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [customBgImage, setCustomBgImage] = useState<File | null>(null);
-  const [selectedEffect, setSelectedEffect] = useState('none');
+  const [selectedEffect, setSelectedEffect] = useState("none");
   const [blurValue, setBlurValue] = useState(50);
   const [brightnessValue, setBrightnessValue] = useState(50);
   const [contrastValue, setContrastValue] = useState(50);
-  const [exportUrl, setExportUrl] = useState('');
+  const [exportUrl, setExportUrl] = useState("");
   const [showCustomColorPicker, setShowCustomColorPicker] = useState(false);
 
-  const processedURL = image.processedFile ? URL.createObjectURL(image.processedFile) : '';
+  const processedURL = image.processedFile
+    ? URL.createObjectURL(image.processedFile)
+    : "";
 
   useEffect(() => {
     if (image.processedFile) {
       applyChanges();
     }
-  }, [bgType, bgColor, customBgImage, selectedEffect, blurValue, brightnessValue, contrastValue]);
+  }, [
+    bgType,
+    bgColor,
+    customBgImage,
+    selectedEffect,
+    blurValue,
+    brightnessValue,
+    contrastValue,
+  ]);
 
   const getCurrentEffectValue = () => {
     switch (selectedEffect) {
-      case 'blur':
+      case "blur":
         return blurValue;
-      case 'brightness':
+      case "brightness":
         return brightnessValue;
-      case 'contrast':
+      case "contrast":
         return contrastValue;
       default:
         return 50;
@@ -66,13 +84,13 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
 
   const handleEffectValueChange = (value: number) => {
     switch (selectedEffect) {
-      case 'blur':
+      case "blur":
         setBlurValue(value);
         break;
-      case 'brightness':
+      case "brightness":
         setBrightnessValue(value);
         break;
-      case 'contrast':
+      case "contrast":
         setContrastValue(value);
         break;
     }
@@ -80,60 +98,60 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
 
   const applyChanges = async () => {
     if (!image.processedFile) return;
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     const img = new Image();
     img.src = processedURL;
-    await new Promise(resolve => img.onload = resolve);
-    
+    await new Promise((resolve) => (img.onload = resolve));
+
     canvas.width = img.width;
     canvas.height = img.height;
-    
+
     // Apply background
-    if (bgType === 'color') {
+    if (bgType === "color") {
       ctx.fillStyle = bgColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else if (bgType === 'image' && customBgImage) {
+    } else if (bgType === "image" && customBgImage) {
       const bgImg = new Image();
       bgImg.src = URL.createObjectURL(customBgImage);
-      await new Promise(resolve => bgImg.onload = resolve);
+      await new Promise((resolve) => (bgImg.onload = resolve));
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
     }
-    
+
     // Draw the processed image
     ctx.drawImage(img, 0, 0);
-    
+
     // Apply effects
-    if (selectedEffect !== 'none') {
+    if (selectedEffect !== "none") {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
-      
+
       switch (selectedEffect) {
-        case 'blur':
+        case "blur":
           // Create a temporary canvas for blur effect
-          const tempCanvas = document.createElement('canvas');
-          const tempCtx = tempCanvas.getContext('2d');
+          const tempCanvas = document.createElement("canvas");
+          const tempCtx = tempCanvas.getContext("2d");
           if (!tempCtx) break;
-          
+
           tempCanvas.width = canvas.width;
           tempCanvas.height = canvas.height;
-          
+
           // Draw current state to temp canvas
           tempCtx.drawImage(canvas, 0, 0);
-          
+
           // Clear main canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
-          
+
           // Apply blur using CSS filter
           ctx.filter = `blur(${blurValue / 10}px)`;
           ctx.drawImage(tempCanvas, 0, 0);
-          ctx.filter = 'none';
+          ctx.filter = "none";
           break;
-          
-        case 'brightness':
+
+        case "brightness":
           for (let i = 0; i < data.length; i += 4) {
             data[i] = Math.min(255, data[i] * (brightnessValue / 50));
             data[i + 1] = Math.min(255, data[i + 1] * (brightnessValue / 50));
@@ -141,9 +159,10 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
           }
           ctx.putImageData(imageData, 0, 0);
           break;
-          
-        case 'contrast':
-          const factor = (259 * (contrastValue + 255)) / (255 * (259 - contrastValue));
+
+        case "contrast":
+          const factor =
+            (259 * (contrastValue + 255)) / (255 * (259 - contrastValue));
           for (let i = 0; i < data.length; i += 4) {
             data[i] = factor * (data[i] - 128) + 128;
             data[i + 1] = factor * (data[i + 1] - 128) + 128;
@@ -153,8 +172,8 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
           break;
       }
     }
-    
-    const dataUrl = canvas.toDataURL('image/png');
+
+    const dataUrl = canvas.toDataURL("image/png");
     setExportUrl(dataUrl);
   };
 
@@ -166,7 +185,7 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mx-4">
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-800">Edit Image</h2>
@@ -178,19 +197,19 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-gray-700 mb-2">Background</h3>
-              <div className="flex gap-2 mb-4">
-                {backgroundOptions.map(option => (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {backgroundOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setBgType(option.id)}
                     className={`px-3 py-1 rounded ${
                       bgType === option.id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     {option.label}
@@ -198,42 +217,34 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
                 ))}
               </div>
 
-              {bgType === 'color' && (
+              {bgType === "color" && (
                 <div>
-                  <div className="flex gap-2 mb-2">
-                    {predefinedColors.map(color => (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {predefinedColors.map((color) => (
                       <button
                         key={color}
                         onClick={() => setBgColor(color)}
-                        className="w-8 h-8 rounded-full border border-gray-300"
+                        className="w-8 h-8 rounded-full"
                         style={{ backgroundColor: color }}
                       />
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <button
-                      onClick={() => setShowCustomColorPicker(!showCustomColorPicker)}
-                      className="px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors text-sm text-gray-700"
-                    >
-                      Custom Color
-                    </button>
-                    {showCustomColorPicker && (
-                      <input
-                        type="color"
-                        value={bgColor}
-                        onChange={(e) => setBgColor(e.target.value)}
-                        className="w-8 h-8 border border-gray-400 rounded-md hover:bg-blue-200"
-                      />
-                    )}
-                  </div>
+                  <input
+                    type="color"
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="w-full"
+                  />
                 </div>
               )}
 
-              {bgType === 'image' && (
+              {bgType === "image" && (
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setCustomBgImage(e.target.files?.[0] || null)}
+                  onChange={(e) =>
+                    setCustomBgImage(e.target.files?.[0] || null)
+                  }
                   className="w-full"
                 />
               )}
@@ -241,15 +252,15 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
 
             <div>
               <h3 className="font-medium text-gray-700 mb-2">Effects</h3>
-              <div className="flex gap-2 mb-4">
-                {effectOptions.map(option => (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {effectOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => setSelectedEffect(option.id)}
                     className={`px-3 py-1 rounded ${
                       selectedEffect === option.id
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     {option.label}
@@ -257,14 +268,16 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
                 ))}
               </div>
 
-              {selectedEffect !== 'none' && (
+              {selectedEffect !== "none" && (
                 <div>
                   <input
                     type="range"
                     min="0"
                     max="100"
                     value={getCurrentEffectValue()}
-                    onChange={(e) => handleEffectValueChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handleEffectValueChange(Number(e.target.value))
+                    }
                     className="w-full"
                   />
                   <div className="flex justify-between text-sm text-gray-500">
@@ -283,24 +296,24 @@ export function EditModal({ image, isOpen, onClose, onSave }: EditModalProps) {
               <img
                 src={exportUrl || processedURL}
                 alt="Preview"
-                className="w-full object-contain"
+                className="w-full h-auto"
               />
             </div>
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="flex justify-end mt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Save Changes
+            Save
           </button>
         </div>
       </div>

@@ -187,10 +187,10 @@ export default function App() {
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800">BG Remover</h1>
             {!isIOS && (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mt-4 sm:mt-0">
                 <span className="text-gray-600">Model:</span>
                 <select
                   value={currentModel}
@@ -226,7 +226,9 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div
           className={`grid ${
-            images.length === 0 ? "grid-cols-2 gap-8" : "grid-cols-1"
+            images.length === 0
+              ? "grid-cols-1 sm:grid-cols-2 gap-8"
+              : "grid-cols-1"
           }`}
         >
           {images.length === 0 && (
@@ -234,7 +236,7 @@ export default function App() {
               <img
                 src="hero.png"
                 alt="Surprised man"
-                className="mb-6 w-full object-cover h-[400px]"
+                className="mb-6 w-full object-cover h-[200px] sm:h-[400px]"
               />
               <h2 className="text-3xl font-bold text-gray-800 mb-4">
                 Remove Image Background
