@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { ImageFile } from "../App";
 import { EditModal } from "./EditModal";
+import {
+  ReactCompareSlider,
+  ReactCompareSliderImage,
+} from "react-compare-slider";
 
 interface ImagesProps {
   images: ImageFile[];
@@ -10,13 +14,17 @@ interface ImagesProps {
 export function Images({ images, onDelete }: ImagesProps) {
   return (
     <div>
-      <h2 className="hidden text-gray-800 text-xl font-semibold mb-4">Images: {images.length}</h2>
+      <h2 className="hidden text-gray-800 text-xl font-semibold mb-4">
+        Images: {images.length}
+      </h2>
       <div className="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {images.map((image) => {
-          if(image.file.type.includes("video")) {
+          if (image.file.type.includes("video")) {
             return <Video video={image} key={image.id} />;
           } else {
-            return <ImageSpot image={image} onDelete={onDelete} key={image.id} />;
+            return (
+              <ImageSpot image={image} onDelete={onDelete} key={image.id} />
+            );
           }
         })}
       </div>
@@ -47,14 +55,22 @@ interface ImageSpotProps {
 function ImageSpot({ image, onDelete }: ImageSpotProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [processedImageUrl, setProcessedImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   const url = URL.createObjectURL(image.file);
-  const processedURL = image.processedFile ? URL.createObjectURL(image.processedFile) : "";
+  const processedURL = image.processedFile
+    ? URL.createObjectURL(image.processedFile)
+    : "";
   const isProcessing = !image.processedFile;
 
   const handleEditSave = (editedImageUrl: string) => {
     setProcessedImageUrl(editedImageUrl);
   };
+
+  useEffect(() => {
+    setImageUrl(url);
+    console.log(url);
+  }, [url]);
 
   const transparentBg = `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAGUExURb+/v////5nD/3QAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAUSURBVBjTYwABQSCglEENMxgYGAAynwRB8BEAgQAAAABJRU5ErkJggg==")`;
 
@@ -76,17 +92,27 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
             </div>
           </div>
         ) : (
-          <div 
+          <div
             className="w-full aspect-square"
-            style={{ 
+            style={{
               background: transparentBg,
-              backgroundRepeat: 'repeat'
+              backgroundRepeat: "repeat",
             }}
           >
-            <img
+            {/* <img
               className="w-full h-full object-cover transition-opacity duration-200"
               src={processedImageUrl || processedURL}
               alt={`Processed image ${image.id}`}
+            /> */}
+            <ReactCompareSlider
+              className="w-full h-full object-cover transition-opacity duration-200"
+              itemOne={
+                <ReactCompareSliderImage
+                  src={processedImageUrl || processedURL}
+                  alt="Image one"
+                />
+              }
+              itemTwo={<ReactCompareSliderImage src={url} alt="Image two" />}
             />
           </div>
         )}
@@ -100,8 +126,18 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
               className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
               title="Delete"
             >
-              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                className="w-4 h-4 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
               <span className="text-sm text-gray-700">Delete</span>
             </button>
@@ -110,8 +146,18 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
               className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
               title="Edit"
             >
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              <svg
+                className="w-4 h-4 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
               </svg>
               <span className="text-sm text-gray-700">Edit</span>
             </button>
@@ -121,8 +167,18 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
               className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
               title="Download"
             >
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              <svg
+                className="w-4 h-4 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
               </svg>
               <span className="text-sm text-gray-700">Download</span>
             </a>

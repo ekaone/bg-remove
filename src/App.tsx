@@ -1,5 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import {
+  ReactCompareSlider,
+  ReactCompareSliderImage,
+} from "react-compare-slider";
+
 import { Images } from "./components/Images";
 import { processImages, initializeModel, getModelInfo } from "../lib/process";
 
@@ -233,10 +238,14 @@ export default function App() {
         >
           {images.length === 0 && (
             <div className="flex flex-col justify-center items-start">
-              <img
-                src="hero.png"
-                alt="Surprised man"
+              <ReactCompareSlider
                 className="mb-6 w-full object-cover h-[200px] sm:h-[400px]"
+                itemOne={
+                  <ReactCompareSliderImage src="/3-0.png" alt="Image one" />
+                }
+                itemTwo={
+                  <ReactCompareSliderImage src="/3.jpg" alt="Image two" />
+                }
               />
               <h2 className="text-3xl font-bold text-gray-800 mb-4">
                 Remove Image Background
