@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { ImageFile } from "../App";
 import { EditModal } from "./EditModal";
+import { ExportOptionsMenu, type ExportOptions } from "../App";
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -54,6 +55,7 @@ interface ImageSpotProps {
 
 function ImageSpot({ image, onDelete }: ImageSpotProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [processedImageUrl, setProcessedImageUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
@@ -65,6 +67,57 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
 
   const handleEditSave = (editedImageUrl: string) => {
     setProcessedImageUrl(editedImageUrl);
+  };
+
+  const handleExport = async (options: ExportOptions) => {
+    if (!image.processedFile) return;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.src = processedImageUrl || processedURL;
+    await new Promise((resolve) => (img.onload = resolve));
+
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    let mimeType: string;
+    let quality: number | undefined;
+
+    switch (options.format) {
+      case "png":
+        mimeType = "image/png";
+        quality = undefined; // PNG is lossless
+        break;
+      case "webp":
+        mimeType = "image/webp";
+        quality = options.quality / 100;
+        break;
+      case "png-compressed":
+        mimeType = "image/png";
+        quality = options.quality / 100;
+        break;
+      default:
+        mimeType = "image/png";
+        quality = undefined;
+    }
+
+    const dataUrl = canvas.toDataURL(mimeType, quality);
+
+    // Create temporary link and trigger download
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = `processed-${image.id}.${
+      options.format === "png-compressed" ? "png" : options.format
+    }`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setShowExportMenu(false);
   };
 
   useEffect(() => {
@@ -161,27 +214,34 @@ function ImageSpot({ image, onDelete }: ImageSpotProps) {
               </svg>
               <span className="text-sm text-gray-700">Edit</span>
             </button>
-            <a
-              href={processedImageUrl || processedURL}
-              download={`processed-${image.id}.png`}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
-              title="Download"
-            >
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
+                title="Export"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              <span className="text-sm text-gray-700">Download</span>
-            </a>
+                <svg
+                  className="w-4 h-4 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                <span className="text-sm text-gray-700">Export</span>
+              </button>
+
+              {showExportMenu && (
+                <div className="absolute bottom-full mb-2 right-0 z-10">
+                  <ExportOptionsMenu onExport={handleExport} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

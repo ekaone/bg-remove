@@ -18,6 +18,11 @@ export interface ImageFile {
   processedFile?: File;
 }
 
+export interface ExportOptions {
+  format: "png" | "webp" | "png-compressed";
+  quality: number;
+}
+
 // Sample images from Unsplash
 const sampleImages = [
   "https://images.unsplash.com/photo-1601233749202-95d04d5b3c00?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.0.3",
@@ -38,6 +43,57 @@ const isMobileSafari = () => {
     !ua.match(/OPiOS/i) &&
     !ua.match(/FxiOS/i);
   return iOSSafari && "ontouchend" in document;
+};
+
+export const ExportOptionsMenu = ({
+  onExport,
+}: {
+  onExport: (options: ExportOptions) => void;
+}) => {
+  const [format, setFormat] = useState<ExportOptions["format"]>("png");
+  const [quality, setQuality] = useState(90);
+
+  return (
+    <div className="bg-white rounded-lg p-4 shadow-sm">
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Format
+        </label>
+        <select
+          value={format}
+          onChange={(e) => setFormat(e.target.value as ExportOptions["format"])}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        >
+          <option value="png">PNG (Lossless)</option>
+          <option value="webp">WebP (High Quality)</option>
+          <option value="png-compressed">PNG (Compressed)</option>
+        </select>
+      </div>
+
+      {format !== "png" && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">
+            Quality ({quality}%)
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={quality}
+            onChange={(e) => setQuality(Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      )}
+
+      <button
+        onClick={() => onExport({ format, quality })}
+        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+      >
+        Export
+      </button>
+    </div>
+  );
 };
 
 export default function App() {
